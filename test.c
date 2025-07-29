@@ -8,6 +8,8 @@ void foo(list(int) *l){
 }
 
 int main(){
+
+    INFO("Welcome to wacky C stuff");
     
     list(int) l = lcreate(int, 10);
     for(int i = 0; i < 30; i++){
@@ -22,9 +24,9 @@ int main(){
         printf("%d\n", num);
     );
 
-    int num; lget(l, 5, num);
+    int num; lget(l, 10, num);
 
-    printf("%d\n", num);
+    INFO("%d", num);
 
     ldestroy(l);
 
@@ -40,5 +42,10 @@ int main(){
 
     sdestroy(str);
 */
+
+    TODO("Add more macros like: slice, sorting, etc.");
+
+    INFO("%d", num);
+
     return 0;
 }

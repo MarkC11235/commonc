@@ -1,11 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// ERROR ==========================================================================================
-#define ERROR(msg) \
-    printf(msg);   \
-    exit(1);       
+// DEBUG ==========================================================================================
+#define ERROR(msg, ...)                                                         \
+    do {                                                                        \
+        printf("%s:%d   ERROR: " msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);  \
+        exit(1);                                                                \
+    } while(0) 
 
+#define TODO(msg, ...)                                                          \
+    do {                                                                        \
+        printf("%s:%d   TODO: " msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);   \
+        exit(1);                                                                \
+    } while(0) 
+
+#define INFO(msg, ...)                                                          \
+    do {                                                                        \
+        printf("%s:%d   INFO: " msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);   \
+    } while(0) 
 // ================================================================================================
 
 // LIST ===========================================================================================
@@ -46,7 +58,7 @@
 #define lget(list, index, var_name)  \
     do{ \
         if(index >= (list).count){ \
-            ERROR("Out of range at index "); \
+            ERROR("Out of range at index %d", index); \
         } \
         else {  \
             var_name = (list).items[index]; \
@@ -56,7 +68,7 @@
 #define lset(list, index, item) \
     do{ \
         if(index >= (list).count){ \
-            ERROR("Out of range at index "); \
+            ERROR("Out of range at index %d", index); \
         } \
         else {  \
             (list).items[index] = item; \
