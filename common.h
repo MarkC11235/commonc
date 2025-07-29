@@ -52,6 +52,15 @@
         printf("%s ]\n", buf);                                  \
     } while(0)
 
+
+#define foreach(item, list, code)                           \
+    do {                                                    \
+        for(int _iter = 0; _iter < list.count; _iter++){    \
+            typeof(*(list.items)) item = list.items[_iter]; \
+            code                                            \
+        }                                                   \
+    } while(0)
+
 // ==================================================================================================
 
 

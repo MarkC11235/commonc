@@ -11,6 +11,10 @@ int main(){
     }
     lprint(l, itostr);
 
+    foreach(num, l, 
+        printf("%d\n", num);
+    );
+
     ldestroy(l);
 
 
@@ -18,6 +22,10 @@ int main(){
     sappend(str, "Mark ");
     sappend(str, "Castle"); 
     sprint(str);
+
+    foreach(c, str, 
+        printf("%c\n", c);
+    );
 
     sdestroy(str);
 
