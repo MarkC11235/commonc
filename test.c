@@ -10,7 +10,12 @@ void foo(list(int) *l){
 int main(){
 
     INFO("Welcome to wacky C stuff");
+    ERROR("ABORT");
+
     
+
+
+/*
     list(int) l = lcreate(int, 10);
     for(int i = 0; i < 30; i++){
         lpush(l, i);
@@ -30,7 +35,7 @@ int main(){
 
     ldestroy(l);
 
-/*
+
     string str = screate(10);
     sappend(str, "Mark ");
     sappend(str, "Castle"); 
@@ -41,11 +46,12 @@ int main(){
     );
 
     sdestroy(str);
-*/
+
 
     TODO("Add more macros like: slice, sorting, etc.");
 
     INFO("%d", num);
+*/
 
     return 0;
 }

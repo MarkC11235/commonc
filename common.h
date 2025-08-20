@@ -2,9 +2,12 @@
 #include <stdlib.h>
 
 // DEBUG ==========================================================================================
+#define NO_COLOR "\033[0m"
+#define RED "\033[0;31m"
+
 #define ERROR(msg, ...)                                                         \
     do {                                                                        \
-        printf("%s:%d   ERROR: " msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);  \
+        printf(RED"%s:%d   ERROR: "NO_COLOR msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);  \
         exit(1);                                                                \
     } while(0) 
 
