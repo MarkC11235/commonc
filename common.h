@@ -150,7 +150,7 @@
 // OPTIONS ========================================================================================== 
 #define FIELD(type, name, def) type name;
 #define DEFAULT(type, name, def) .name = def,
-
+#define UNPACK(type, name, def) type name = ops.name;
 /* STEPS 
  * 1. define the fields (type, name, default_value)
  * 2. use fields to make the Options struct
@@ -162,8 +162,10 @@
 typedef struct { OUT_FIELDS(FIELD) } out_Options;
 #define out(...) out_((out_Options){OUT_FIELDS(DEFAULT) __VA_ARGS__})
 void out_(out_Options ops){
-    int n = ops.n;
-    char* s = ops.s;
+    //int n = ops.n;
+    //char* s = ops.s;
+    OUT_FIELDS(UNPACK)
+
     for(int i = 0; i < n; i++){
         printf("%s\n", s);
     }
