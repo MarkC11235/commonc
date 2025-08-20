@@ -156,17 +156,19 @@
  * 2. use fields to make the Options struct
  * 3. use fields to make wrapper macro for the function 
  * 4. define function
+ * 5. use unpack in the function to get all fields as local vars
  */
 
-#define OUT_FIELDS(X) X(int, n, 1) X(char*, s, "")
-typedef struct { OUT_FIELDS(FIELD) } out_Options;
-#define out(...) out_((out_Options){OUT_FIELDS(DEFAULT) __VA_ARGS__})
+#define out_FIELDS(X) X(int, n, 1) X(char*, s, "") X(int, indent, 0)
+typedef struct { out_FIELDS(FIELD) } out_Options;
+#define out(...) out_((out_Options){out_FIELDS(DEFAULT) __VA_ARGS__})
 void out_(out_Options ops){
-    //int n = ops.n;
-    //char* s = ops.s;
-    OUT_FIELDS(UNPACK)
+    out_FIELDS(UNPACK)
 
     for(int i = 0; i < n; i++){
+        for(int j = 0; j < indent; j++){
+            printf(" ");
+        }
         printf("%s\n", s);
     }
 }

@@ -14,6 +14,7 @@ int main(){
     out(); 
     out(.s = "Mark");
     out(.s = "Louis", .n = 10);
+    out(.s = "Bob", .n = 4, .indent = 5);
     out(.n = 5);
     out(.s = "Castle");
 
