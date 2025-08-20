@@ -10,9 +10,10 @@ void foo(list(int) *l){
 int main(){
 
     INFO("Welcome to wacky C stuff");
-    ERROR("ABORT");
 
-    
+    hello();
+    INFO("SPACER");
+    hello(.n = 1, .s = "Bye");
 
 
 /*

@@ -5,10 +5,10 @@
 #define NO_COLOR "\033[0m"
 #define RED "\033[0;31m"
 
-#define ERROR(msg, ...)                                                         \
-    do {                                                                        \
+#define ERROR(msg, ...)                                                                    \
+    do {                                                                                   \
         printf(RED"%s:%d   ERROR: "NO_COLOR msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);  \
-        exit(1);                                                                \
+        exit(1);                                                                           \
     } while(0) 
 
 #define TODO(msg, ...)                                                          \
@@ -145,6 +145,28 @@
     } while(0)
 
 // ==================================================================================================
+
+
+// OPTIONS ========================================================================================== 
+typedef struct {
+    int n;
+    char* s;
+} Options;
+
+void hello_(Options ops){
+    int n = ops.n;
+    char* s = ops.s;
+    for(int i = 0; i < n; i++){
+        printf("%s\n", s);
+    }
+}
+
+#define hello(...)           \
+    hello_((Options){ .n = 5, .s = "Hello, World", __VA_ARGS__ })    
+
+// ==================================================================================================
+
+
 
 
 
