@@ -148,26 +148,19 @@
 
 
 // OPTIONS ========================================================================================== 
+#define FIELD(type, name, def) type name;
+#define DEFAULT(type, name, def) .name = def,
+
 /* STEPS 
  * 1. define the fields (type, name, default_value)
  * 2. use fields to make the Options struct
- * 3. define defaults
+ * 3. use fields to make wrapper macro for the function 
  * 4. define function
- * 5. use fields to make wrapper macro for the function 
  */
 
-
-#define OUT_FIELDS(OUT_X)   \
-    OUT_X(int, n, 1)        \
-    OUT_X(char*, s, "")
-
-#define OUT_X(type, name, def) type name;
-typedef struct { OUT_FIELDS(OUT_X) } out_Options;
-#undef OUT_X
-
-#define OUT_X(type, name, def) .name = def,
-#define OUT_DEFAULTS OUT_FIELDS(OUT_X)
-
+#define OUT_FIELDS(X) X(int, n, 1) X(char*, s, "")
+typedef struct { OUT_FIELDS(FIELD) } out_Options;
+#define out(...) out_((out_Options){OUT_FIELDS(DEFAULT) __VA_ARGS__})
 void out_(out_Options ops){
     int n = ops.n;
     char* s = ops.s;
@@ -175,7 +168,6 @@ void out_(out_Options ops){
         printf("%s\n", s);
     }
 }
-#define out(...) out_((out_Options){OUT_DEFAULTS __VA_ARGS__})
 
 // ==================================================================================================
 
