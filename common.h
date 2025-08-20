@@ -148,10 +148,17 @@
 
 
 // OPTIONS ========================================================================================== 
-typedef struct {
-    int n;
-    char* s;
-} out_Options;
+#define OUT_FIELDS(OUT_X)   \
+    OUT_X(int, n, 1)        \
+    OUT_X(char*, s, "")
+
+#define OUT_X(type, name, def) type name;
+typedef struct { OUT_FIELDS(OUT_X) } out_Options;
+#undef OUT_X
+
+#define OUT_X(type, name, def) .name = def,
+#define OUT_DEFAULTS OUT_FIELDS(OUT_X)
+#define out(...) out_((out_Options){OUT_DEFAULTS __VA_ARGS__})
 
 void out_(out_Options ops){
     int n = ops.n;
@@ -160,9 +167,6 @@ void out_(out_Options ops){
         printf("%s\n", s);
     }
 }
-
-#define out(...)           \
-    out_((out_Options){ .n = 1, .s = "", __VA_ARGS__ })    
 
 // ==================================================================================================
 
