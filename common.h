@@ -151,9 +151,9 @@
 typedef struct {
     int n;
     char* s;
-} Options;
+} out_Options;
 
-void hello_(Options ops){
+void out_(out_Options ops){
     int n = ops.n;
     char* s = ops.s;
     for(int i = 0; i < n; i++){
@@ -161,8 +161,8 @@ void hello_(Options ops){
     }
 }
 
-#define hello(...)           \
-    hello_((Options){ .n = 5, .s = "Hello, World", __VA_ARGS__ })    
+#define out(...)           \
+    out_((out_Options){ .n = 1, .s = "", __VA_ARGS__ })    
 
 // ==================================================================================================
 

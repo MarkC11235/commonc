@@ -10,11 +10,12 @@ void foo(list(int) *l){
 int main(){
 
     INFO("Welcome to wacky C stuff");
-
-    hello();
-    INFO("SPACER");
-    hello(.n = 1, .s = "Bye");
-
+    
+    out(); 
+    out(.s = "Mark");
+    out(.s = "Louis", .n = 10);
+    out(.n = 5);
+    out(.s = "Castle");
 
 /*
     list(int) l = lcreate(int, 10);
