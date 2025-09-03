@@ -1,13 +1,13 @@
-#define FIELD(type, name, def) type name;
-#define DEFAULT(type, name, def) .name = def,
-#define UNPACK(type, name, def) type name = ops.name;
+#define field(type, name, def) type name;
+#define default(type, name, def) .name = def,
+#define unpack(type, name, def) type name = ops.name;
 #include <stdio.h>
 
-#define out_FIELDS(X) X(int, n, 1) X(char*, s, "") X(int, indent, 0) 
-typedef struct { out_FIELDS(FIELD) } out_Options;
-#define out(...) out_((out_Options) { out_FIELDS(DEFAULT) __VA_ARGS__ })
-void out_(out_Options ops){
-    out_FIELDS(UNPACK)
+#define out_fields(x) x(int, n, 1) x(char*, s, "") x(int, indent, 0) 
+typedef struct { out_fields(field) } out_options;
+#define out(...) out_((out_options) { out_fields(default) __VA_ARGS__ })
+void out_(out_options ops){
+    out_fields(unpack)
     for(int i = 0; i < n; i++){
         for(int j = 0; j < indent; j++){
             printf(" ");
@@ -17,11 +17,11 @@ void out_(out_Options ops){
 }
 
 
-#define foo_FIELDS(X) X(int, a, 5) X(int, b, 10) 
-typedef struct { foo_FIELDS(FIELD) } foo_Options;
-#define foo(x, ...) foo_((foo_Options) { foo_FIELDS(DEFAULT) __VA_ARGS__ }, x)
-int foo_(foo_Options ops, int x){
-    foo_FIELDS(UNPACK)
+#define foo_fields(x) x(int, a, 5) x(int, b, 10) 
+typedef struct { foo_fields(field) } foo_options;
+#define foo(x, ...) foo_((foo_options) { foo_fields(default) __VA_ARGS__ }, x)
+int foo_(foo_options ops, int x){
+    foo_fields(unpack)
     return x + a + b;
 }
 

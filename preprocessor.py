@@ -39,103 +39,118 @@
 
 import sys
 
-args = sys.argv
-argc = len(args)
+def process_mc_to_c(input_file: str) -> str:
+    with open(input_file, "r") as f:
+        out_file  = ""
+        out_file += "#define field(type, name, def) type name;\n"
+        out_file += "#define default(type, name, def) .name = def,\n"
+        out_file += "#define unpack(type, name, def) type name = ops.name;\n"
 
-if argc < 2:
-    print("no input file: file_name.mc")
-    exit(1)
+        lines = f.readlines()
 
-input_file = args[1]
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            if len(line) == 0:
+                i+=1
+                continue
+
+            if line[0] == "@":
+                # parse optvars
+                assert line[1] == "[", "expect ["
+
+                j = 2
+                # (type, name, default)
+                optvars = []
+                while j < len(line) and line[j] != "]":
+                    assert line[j] == "(", f"expect (, got {line[j]}"
+                    j += 1
+
+                    comma = line[j:].find(",") + j
+                    typ = line[j: comma]
+                    j = comma + 2
+
+                    comma = line[j:].find(",") + j
+                    name = line[j: comma]
+                    j = comma + 2
+
+                    paren = line[j:].find(")") + j
+                    value = line[j: paren]
+                    j = paren + 3
+
+                    optvars.append((typ, name, value))
+
+                # parse func signature line
+                assert len(lines) > i + 1, "expected func def, found eof"
+                i += 1
+
+                fundef = lines[i]
+                fn = fundef[fundef.find(" ") + 1: fundef.find("(")]
+                # write x macros, struct and wrapper macro
+                out_file += f"#define {fn}_fields(x) "
+                for optvar in optvars:
+                    out_file += f"x({', '.join(optvar)}) "
+                out_file += "\n"
+
+                out_file += f"typedef struct {{ {fn}_fields(field) }} {fn}_options;\n"
+                out_file += f"#define {fn}(" 
+
+                req_args = fundef[fundef.find("(") + 1: fundef.find(")")].split(", ")
+                for ra in req_args:
+                    if len(ra) != 0:
+                        out_file += ra.split(" ")[1] + ", "
 
 
-with open(input_file, "r") as f:
-    out_file  = ""
-    out_file += "#define FIELD(type, name, def) type name;\n"
-    out_file += "#define DEFAULT(type, name, def) .name = def,\n"
-    out_file += "#define UNPACK(type, name, def) type name = ops.name;\n"
+                out_file += f"...) {fn}_(({fn}_options) {{ {fn}_fields(default) __VA_ARGS__ }}" 
 
-    lines = f.readlines()
+                for p in range(len(req_args)):
+                    ra = req_args[p]
+                    if len(ra) != 0:
+                        out_file += ", " + ra.split(" ")[1]
 
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        if len(line) > 0 and line[0] == "@":
-            # parse optvars
-            assert line[1] == "[", "expect ["
-            
-            j = 2
-            # (type, name, default)
-            optvars = []
-            while j < len(line) and line[j] != "]":
-                assert line[j] == "(", f"expect (, got {line[j]}"
-                j += 1
-                
-                comma = line[j:].find(",") + j
-                typ = line[j: comma]
-                j = comma + 2
-                
-                comma = line[j:].find(",") + j
-                name = line[j: comma]
-                j = comma + 2
 
-                paren = line[j:].find(")") + j
-                value = line[j: paren]
-                j = paren + 3
+                out_file += ")\n"
 
-                optvars.append((typ, name, value))
-            
-            # parse func signature line
-            assert len(lines) > i + 1, "expected func def, found EOF"
+                # modify func signature line
+                out_file += fundef[:fundef.find(" ")]
+                out_file += f" {fn}_({fn}_options ops"
+                if fundef.find(")") - fundef.find("(") - 1 != 0:
+                    # has args
+                    out_file += ", "
+
+                out_file += fundef[fundef.find("(") + 1:]
+
+
+                # add unpack macro inside of func
+                out_file += f"    {fn}_fields(unpack)\n" 
+
+            else:
+                out_file += line
+
             i += 1
 
-            fundef = lines[i]
-            fn = fundef[fundef.find(" ") + 1: fundef.find("(")]
-            # write X macros, struct and wrapper macro
-            out_file += f"#define {fn}_FIELDS(X) "
-            for optvar in optvars:
-                out_file += f"X({', '.join(optvar)}) "
-            out_file += "\n"
-
-            out_file += f"typedef struct {{ {fn}_FIELDS(FIELD) }} {fn}_Options;\n"
-            out_file += f"#define {fn}(" 
-            
-            req_args = fundef[fundef.find("(") + 1: fundef.find(")")].split(", ")
-            for ra in req_args:
-                if len(ra) != 0:
-                    out_file += ra.split(" ")[1] + ", "
+    return out_file
 
 
-            out_file += f"...) {fn}_(({fn}_Options) {{ {fn}_FIELDS(DEFAULT) __VA_ARGS__ }}" 
-       
-            for p in range(len(req_args)):
-                ra = req_args[p]
-                if len(ra) != 0:
-                    out_file += ", " + ra.split(" ")[1]
+def main():
+    args = sys.argv
+    argc = len(args)
+
+    if argc < 2:
+        print("no input file: file_name.mc")
+        exit(1)
+
+    input_file = args[1]
+
+    out_file = process_mc_to_c(input_file)
+
+    with open(input_file[:input_file.find(".")] + ".c", "w") as f:
+        f.write(out_file)
 
 
-            out_file += ")\n"
 
-            # modify func signature line
-            out_file += fundef[:fundef.find(" ")]
-            out_file += f" {fn}_({fn}_Options ops"
-            if fundef.find(")") - fundef.find("(") - 1 != 0:
-                # has args
-                out_file += ", "
+main()
 
-            out_file += fundef[fundef.find("(") + 1:]
-
-
-            # add UNPACK macro inside of func
-            out_file += f"    {fn}_FIELDS(UNPACK)\n" 
-
-        else:
-            out_file += line
-
-        i += 1
-
-with open(input_file[:input_file.find(".")] + ".c", "w") as f:
-    f.write(out_file)
 
 
 

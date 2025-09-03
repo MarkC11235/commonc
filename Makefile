@@ -1,4 +1,5 @@
 FILE=test
 
-main: $(FILE).c common.h
+main: $(FILE).mc common.h
+	./preprocessor.py $(FILE).mc
 	gcc -std=c99 -o $(FILE) $(FILE).c
