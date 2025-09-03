@@ -37,6 +37,16 @@
 #   @[...]
 #   typename funcname(){
 
+
+# Next Ideas 
+# More types of decorators and allowing multiple of them stacked on a function (order may matter)
+
+# @default_args[...] // Will eventually just make this look into the function signature to extract the default args 
+# @time              // Times the function and prints to the terminal (maybe add options to redcirect the output)
+# ...
+
+
+
 import sys
 
 def process_mc_to_c(input_file: str) -> str:
