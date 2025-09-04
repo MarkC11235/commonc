@@ -47,6 +47,7 @@
 # @time              // Times the function and prints to the terminal (maybe add options to redcirect the output)
 # ...
 
+# Timer code 
 
 import sys
 
@@ -126,6 +127,18 @@ def parse_default_args_decorator(line: str, fndef: str):
 def process_mc_to_c(input_file: str) -> str:
     out_file  = ""
     # headers
+    out_file += "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n\n" # for time decorator
+    out_file += "struct timespec start, end; \\\n"
+    out_file += "double time_taken_sec;      \\\n"
+    out_file += "double time_taken_nsec;     \n"
+    out_file += "#define TIME_START clock_gettime(CLOCK_MONOTONIC, &start); \n"
+    out_file += "#define TIME_END                                           \\\n"
+    out_file += "   clock_gettime(CLOCK_MONOTONIC, &end);                  \\\n"
+    out_file += "   time_taken_sec = (end.tv_sec - start.tv_sec);          \\\n"
+    out_file += "   time_taken_nsec = (end.tv_nsec - start.tv_nsec) / 1e9; \\\n"
+    out_file += "   printf(\"elapsed time: %f seconds\\n\", time_taken_sec + time_taken_nsec);\n"
+
+    # for default args decorator
     out_file += "#define field(type, name, def) type name;\n"
     out_file += "#define default_arg(type, name, def) .name = def,\n"
     out_file += "#define unpack(type, name, def) type name = ops.name;\n"
@@ -148,6 +161,24 @@ def process_mc_to_c(input_file: str) -> str:
                     fndef = lines[i]
                     
                     out_file += parse_default_args_decorator(line[13:], fndef)
+                elif line[1:5] == "time":
+                    # need to gather the whole function def 
+                    stack = []
+                    found_opener = False
+                    fn = ""
+                    while len(stack) != 0 or not(found_opener): # search for closing brackets
+                        i+=1
+                        next_line = lines[i]
+                        for k in range(len(next_line)):
+                            if next_line[k] == "{":
+                                found_opener = True
+                                stack.append("{")
+                            elif next_line[k] == "}":
+                                stack.pop()
+                        fn += next_line
+                    fn = fn[:fn.find("{")+1] + "\n    TIME_START" + fn[fn.find("{")+1:fn.rfind("}")] + "    TIME_END\n}\n"
+
+                    out_file += fn
                 else:
                     assert False, f"invalid decorator type: {line}"
             else:
