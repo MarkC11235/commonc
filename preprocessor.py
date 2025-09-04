@@ -36,6 +36,8 @@
 # Only works for structure
 #   @[...]
 #   typename funcname(){
+#       ...
+#   }
 
 
 # Next Ideas 
@@ -46,16 +48,89 @@
 # ...
 
 
-
 import sys
 
-def process_mc_to_c(input_file: str) -> str:
-    with open(input_file, "r") as f:
-        out_file  = ""
-        out_file += "#define field(type, name, def) type name;\n"
-        out_file += "#define default(type, name, def) .name = def,\n"
-        out_file += "#define unpack(type, name, def) type name = ops.name;\n"
+def parse_default_args_decorator(line: str, fndef: str):
+    out_file = ""
 
+    # parse optvars
+    assert line[0] == "[", "expect ["
+
+    j = 1
+    # (type, name, default)
+    optvars = []
+    while j < len(line) and line[j] != "]":
+        assert line[j] == "(", f"expect (, got {line[j]}"
+        j += 1
+
+        comma = line[j:].find(",") + j
+        typ = line[j: comma]
+        j = comma + 2
+
+        comma = line[j:].find(",") + j
+        name = line[j: comma]
+        j = comma + 2
+
+        paren = line[j:].find(")") + j
+        value = line[j: paren]
+        j = paren + 3
+
+        optvars.append((typ, name, value))
+
+    # this is why the function type cannot have multiple words before the func name becasue I split on space
+    fn_name = fndef[fndef.find(" ") + 1: fndef.find("(")] # func name 
+
+    # write x macros, 
+    out_file += f"#define {fn_name}_fields(_X) "
+    for optvar in optvars:
+        out_file += f"_X({', '.join(optvar)}) "
+    out_file += "\n"
+    # options struct,
+    out_file += f"typedef struct {{ {fn_name}_fields(field) }} {fn_name}_options;\n"
+    # and wrapper macro
+    out_file += f"#define {fn_name}(" 
+
+    # extract required args from fn def and write their names as the macro params 
+    req_args = fndef[fndef.find("(") + 1: fndef.find(")")].split(", ")
+    for ra in req_args:
+        if len(ra) != 0:
+            out_file += ra.split(" ")[1] + ", "
+
+
+    out_file += f"...) {fn_name}_(({fn_name}_options) {{ {fn_name}_fields(default_arg) __VA_ARGS__ }}" 
+    
+    # now write the required aregs into the func call inside the wrapper macro 
+    for p in range(len(req_args)):
+        ra = req_args[p]
+        if len(ra) != 0:
+            out_file += ", " + ra.split(" ")[1]
+
+    out_file += ")\n"
+
+
+    # modify func signature line
+    out_file += fndef[:fndef.find(" ")] # stuff before fn name 
+    out_file += f" {fn_name}_({fn_name}_options ops"
+    if fndef.find(")") - fndef.find("(") - 1 != 0:
+        # has args
+        out_file += ", "
+
+    out_file += fndef[fndef.find("(") + 1:]
+
+
+    # add unpack macro inside of func
+    out_file += f"    {fn_name}_fields(unpack)\n" 
+
+    return out_file
+
+def process_mc_to_c(input_file: str) -> str:
+    out_file  = ""
+    # headers
+    out_file += "#define field(type, name, def) type name;\n"
+    out_file += "#define default_arg(type, name, def) .name = def,\n"
+    out_file += "#define unpack(type, name, def) type name = ops.name;\n"
+    
+    with open(input_file, "r") as f:
         lines = f.readlines()
 
         i = 0
@@ -65,75 +140,16 @@ def process_mc_to_c(input_file: str) -> str:
                 i+=1
                 continue
 
-            if line[0] == "@":
-                # parse optvars
-                assert line[1] == "[", "expect ["
-
-                j = 2
-                # (type, name, default)
-                optvars = []
-                while j < len(line) and line[j] != "]":
-                    assert line[j] == "(", f"expect (, got {line[j]}"
-                    j += 1
-
-                    comma = line[j:].find(",") + j
-                    typ = line[j: comma]
-                    j = comma + 2
-
-                    comma = line[j:].find(",") + j
-                    name = line[j: comma]
-                    j = comma + 2
-
-                    paren = line[j:].find(")") + j
-                    value = line[j: paren]
-                    j = paren + 3
-
-                    optvars.append((typ, name, value))
-
-                # parse func signature line
-                assert len(lines) > i + 1, "expected func def, found eof"
-                i += 1
-
-                fundef = lines[i]
-                fn = fundef[fundef.find(" ") + 1: fundef.find("(")]
-                # write x macros, struct and wrapper macro
-                out_file += f"#define {fn}_fields(x) "
-                for optvar in optvars:
-                    out_file += f"x({', '.join(optvar)}) "
-                out_file += "\n"
-
-                out_file += f"typedef struct {{ {fn}_fields(field) }} {fn}_options;\n"
-                out_file += f"#define {fn}(" 
-
-                req_args = fundef[fundef.find("(") + 1: fundef.find(")")].split(", ")
-                for ra in req_args:
-                    if len(ra) != 0:
-                        out_file += ra.split(" ")[1] + ", "
-
-
-                out_file += f"...) {fn}_(({fn}_options) {{ {fn}_fields(default) __VA_ARGS__ }}" 
-
-                for p in range(len(req_args)):
-                    ra = req_args[p]
-                    if len(ra) != 0:
-                        out_file += ", " + ra.split(" ")[1]
-
-
-                out_file += ")\n"
-
-                # modify func signature line
-                out_file += fundef[:fundef.find(" ")]
-                out_file += f" {fn}_({fn}_options ops"
-                if fundef.find(")") - fundef.find("(") - 1 != 0:
-                    # has args
-                    out_file += ", "
-
-                out_file += fundef[fundef.find("(") + 1:]
-
-
-                # add unpack macro inside of func
-                out_file += f"    {fn}_fields(unpack)\n" 
-
+            if line[0] == "@": # found a decorator
+                if line[1:13] == "default_args":
+                    # parse func signature line
+                    assert len(lines) > i + 1, "expected func def, found eof"
+                    i += 1
+                    fndef = lines[i]
+                    
+                    out_file += parse_default_args_decorator(line[13:], fndef)
+                else:
+                    assert False, f"invalid decorator type: {line}"
             else:
                 out_file += line
 
@@ -160,13 +176,5 @@ def main():
 
 
 main()
-
-
-
-
-
-
-
-
 
 

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-@[(int, n, 1), (char*, s, ""), (int, indent, 0)]
+@default_args[(int, n, 1), (char*, s, ""), (int, indent, 0)]
 void out(){
     for(int i = 0; i < n; i++){
         for(int j = 0; j < indent; j++){
@@ -11,7 +11,7 @@ void out(){
 }
 
 
-@[(int, a, 5), (int, b, 10)]
+@default_args[(int, a, 5), (int, b, 10)]
 int foo(int x){
     return x + a + b;
 }
