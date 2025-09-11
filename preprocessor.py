@@ -47,6 +47,20 @@
 # @time              // Times the function and prints to the terminal (maybe add options to redcirect the output)
 # ...
 
+# even more ideas
+
+# Want the time decorator to print out more information about the function call (name, args, ret),
+# This is really more of an info or the lator mentioned perf decorator
+# Maybe even want the time decorator to TIME the closest block so that the following can happen
+# @time
+# for(...){
+#
+# }
+# and it will add timing stuff to the for loop 
+
+# this can be extended to a system with a @perf 
+# then I can do fancy stuff to make building a C benchmarking framework easier
+
 # Timer code 
 
 import sys
