@@ -113,7 +113,7 @@
         printf("%s ]\n", buf);                                  \
     } while(0)
 
-
+// make the foreach loops accept the iter variable name, so that these loops can be nested
 #define foreach(item, list, code)                           \
     do {                                                    \
         for(int _iter = 0; _iter < (list).count; _iter++){    \
