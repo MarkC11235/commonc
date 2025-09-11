@@ -39,28 +39,12 @@ int foo_(foo_options ops, int x){
 }
 
 
-/*
-int bar(){
-    TIME_START 
-    for(int i = 0; i < 100000; i++){}
-    TIME_END
-}
- */
-
-int bar(){
-    TIME_START
-    for(int i = 0; i < 100000000; i++){}
-    TIME_END
-}
-
 int main(){
     printf("%d\n", foo(7));
     printf("%d\n", foo(7, .a = 1));
     printf("%d\n", foo(7, .b = 45));
 
     out(.s = "Hello");
-
-    bar();
 
     return 0;
 }

@@ -162,6 +162,7 @@ def process_mc_to_c(input_file: str) -> str:
                     
                     out_file += parse_default_args_decorator(line[13:], fndef)
                 elif line[1:5] == "time":
+                    # TODO: This will fail if there are brackets inside strings that don't match
                     # need to gather the whole function def 
                     stack = []
                     found_opener = False

@@ -17,27 +17,12 @@ int foo(int x){
 }
 
 
-/*
-int bar(){
-    TIME_START 
-    for(int i = 0; i < 100000; i++){}
-    TIME_END
-}
- */
-
-@time
-int bar(){
-    for(int i = 0; i < 100000000; i++){}
-}
-
 int main(){
     printf("%d\n", foo(7));
     printf("%d\n", foo(7, .a = 1));
     printf("%d\n", foo(7, .b = 45));
 
     out(.s = "Hello");
-
-    bar();
 
     return 0;
 }
